@@ -1,4 +1,32 @@
-# macOS candidate: cgo `-target` / Apple Clang configuration loading
+# VS Code Calculator demo and macOS cgo verifier
+
+## Visual demo: open the folder, Calculator appears
+
+This private repository can demonstrate the impact visually on an owned Mac.
+The preparation step builds an ad-hoc-signed native library and writes local
+VS Code Go-tool environment settings. It does **not** load the library.
+
+Before recording, close VS Code and run once:
+
+```sh
+./prepare-vscode-demo.sh
+```
+
+Then fully quit VS Code, start recording, and open this repository folder in
+VS Code. With the Go extension enabled and the workspace trusted, gopls loads
+compiled package metadata during workspace initialization. Apple Clang reads
+the repository target config, loads the dylib, and the dylib opens Calculator.
+No build, test, or Go program is started by the user.
+
+For another take, quit VS Code and run `./prepare-vscode-demo.sh` again. It
+removes only this repository's demo sentinel and private Go build cache.
+
+The visual plugin launches Calculator by its Apple bundle identifier through
+`/usr/bin/open` directly with
+`posix_spawn`; it does not invoke a shell or access the network. The marker-only
+vendor verifier remains available under tag `vendor-marker-only-20261025`.
+
+## Marker-only verifier
 
 Status: **confirmed on an owned Apple-silicon Mac**. A live run on macOS
 15.4.1 arm64 with Go 1.26.2 and Apple Clang 17.0.0 passed the direct-driver,
