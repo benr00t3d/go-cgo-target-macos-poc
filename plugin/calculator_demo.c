@@ -1,5 +1,6 @@
 #include <errno.h>
 #include <fcntl.h>
+#include <signal.h>
 #include <spawn.h>
 #include <stdio.h>
 #include <stdlib.h>
@@ -63,11 +64,24 @@ static int open_calculator_and_wait(void) {
     posix_spawnattr_t attr;
     int attr_rc = posix_spawnattr_init(&attr);
     int attr_initialized = attr_rc == 0;
+    sigset_t empty_mask;
     if (attr_rc == 0) {
-        attr_rc = posix_spawnattr_setpgroup(&attr, 0);
+        attr_rc = sigemptyset(&empty_mask) == 0 ? 0 : errno;
     }
     if (attr_rc == 0) {
-        attr_rc = posix_spawnattr_setflags(&attr, POSIX_SPAWN_SETPGROUP);
+        attr_rc = posix_spawnattr_setsigmask(&attr, &empty_mask);
+    }
+    if (attr_rc == 0) {
+        short flags = POSIX_SPAWN_SETSIGMASK;
+#ifdef __APPLE__
+        flags |= POSIX_SPAWN_SETSID | POSIX_SPAWN_CLOEXEC_DEFAULT;
+#else
+        attr_rc = posix_spawnattr_setpgroup(&attr, 0);
+        flags |= POSIX_SPAWN_SETPGROUP;
+#endif
+        if (attr_rc == 0) {
+            attr_rc = posix_spawnattr_setflags(&attr, flags);
+        }
     }
 
     int spawn_rc = attr_rc;
