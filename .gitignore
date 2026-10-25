@@ -3,6 +3,5 @@
 .calculator-loaded
 .video-gocache/
 .vscode/settings.json
-arm64-cfg/calculator_plugin.dylib
 x86_64-cfg/calculator_plugin.dylib
 

@@ -1,7 +1,8 @@
-672a8eeb862e858b606f88d1cf1d17e7ef6c872040e6cb80ad70083cc15e1f1b  ./.gitignore
-173dc98c67bfa63ae05ca1cc6fc531dc97eb0afdaf11e14d26d7a1201c1872a0  ./README.md
+bb93d382655fdc628d34d354c0ddfe4f346e5a75909f893f8da9a191c63cb1e2  ./.gitignore
+75dc6a9726c8acae6bfc73fa841211af11e56f4b78aaf10479b7656d04443531  ./README.md
 46b3a0cd12440da2813e02959db7f218f880ec16c40dc607b70274c1b43ca839  ./STATIC_REVIEW.md
 1404394e3e32913842cf271e672bf2f8aef301f61f3f70d1c6ec2d39f01e8300  ./arm64-cfg/poc-darwin-clang.cfg
+2ffe15e1763bddd6c519bf72ccddf0564cb2b223d9a4a8bcf0b9371794a0ffe5  ./arm64-cfg/calculator_plugin.dylib
 b97abee10425499e1afac3da17f79296d84f06af2a68fefb44c138f576bf351d  ./control/go.mod
 ba26665490f8df6668cd266d48f3c901c6701cded34f7d8fd85ee0113edd29a4  ./control/passive.go
 863e973ab46465d379e43c134280954bcc58df8e626c2d356700a92f4782ae63  ./demo.go
@@ -15,7 +16,6 @@ cc26a2f94cc99b9ef062cc1a30e562dd2d66870d9cfa1d80a6eefb3ac3e8bbfc  ./positive/arm
 51214581aa8035f58de73111ac5cfb60b6fd14189601982aaa90f449ba19945c  ./positive/go.mod
 ba26665490f8df6668cd266d48f3c901c6701cded34f7d8fd85ee0113edd29a4  ./positive/passive.go
 cc26a2f94cc99b9ef062cc1a30e562dd2d66870d9cfa1d80a6eefb3ac3e8bbfc  ./positive/x86_64-cfg/poc-darwin-clang.cfg
-c6de9983df479e73bb800d04efbe80b34ce4cb146f2764e16868a54aea1cb728  ./prepare-vscode-demo.sh
 9bd625baf8ffa9fcbde720dc43d5ac4489e27d3697edd38c52133553d6260467  ./probe.c
 b9cec408fe8fe68c3f88b9a0ebc9f3b637ee0cd0570eebc142198f85c0d8bb8f  ./verify-macos.sh
 1404394e3e32913842cf271e672bf2f8aef301f61f3f70d1c6ec2d39f01e8300  ./x86_64-cfg/poc-darwin-clang.cfg

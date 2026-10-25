@@ -3,23 +3,30 @@
 ## Visual demo: open the folder, Calculator appears
 
 This private repository can demonstrate the impact visually on an owned Mac.
-The preparation step builds an ad-hoc-signed native library and writes local
-VS Code Go-tool environment settings. It does **not** load the library.
+The `main` branch already contains the ad-hoc-signed arm64 Mach-O library,
+target-derived Clang configuration, and cgo package. There is no victim-side
+preparation command.
 
-Before recording, close VS Code and run once:
+The victim flow is only:
 
-```sh
-./prepare-vscode-demo.sh
-```
+1. Clone the private repository to a fresh path on an Apple-silicon Mac.
+2. Open that folder normally in VS Code.
+3. If prompted, trust the workspace and ensure the Go extension is enabled.
 
-Then fully quit VS Code, start recording, and open this repository folder in
-VS Code. With the Go extension enabled and the workspace trusted, gopls loads
-compiled package metadata during workspace initialization. Apple Clang reads
-the repository target config, loads the dylib, and the dylib opens Calculator.
-No build, test, or Go program is started by the user.
+During workspace initialization, gopls requests compiled package metadata.
+Apple Clang reads the repository target config, loads the included dylib, and
+the dylib opens Calculator. The victim does not run a setup script, build,
+test, or Go program.
 
-For another take, quit VS Code and run `./prepare-vscode-demo.sh` again. It
-removes only this repository's demo sentinel and private Go build cache.
+Use `gh repo clone` rather than a browser ZIP for the recording so macOS does
+not add browser-download quarantine metadata to the dylib. The included binary
+is arm64 and was built and signed on GitHub's macOS runner. SHA-256:
+`2ffe15e1763bddd6c519bf72ccddf0564cb2b223d9a4a8bcf0b9371794a0ffe5`.
+
+For another recording take, use a new clone path and remove the one-shot file
+`/tmp/go-cgo-vscode-calculator.once` before reopening VS Code. This reset is
+only for the researcher making repeated recordings; it is not part of the
+victim flow.
 
 The visual plugin launches Calculator by its Apple bundle identifier through
 `/usr/bin/open` directly with
@@ -110,9 +117,9 @@ configuration, and generated dylib. A macOS receipt must show:
 5. Go rejects the directly written `-Xclang -load` control; and
 6. no target Go program is run.
 
-Only after those gates pass should the Go report claim macOS support. A second
-run through gopls workspace initialization can then extend the already-proven
-Linux impact trigger to macOS.
+Those gates passed on the retained M1 receipt. The marker-only evidence remains
+the submission proof; the root-module Calculator path is an optional visual
+demonstration of the same compiler load.
 
 ## Likely negative-result causes
 
