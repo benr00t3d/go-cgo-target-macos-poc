@@ -1,6 +1,6 @@
 # VS Code Calculator demo and macOS cgo verifier
 
-## Visual demo: open the folder, Calculator appears
+## Visual demo: open `demo.go`, Calculator appears
 
 This private repository can demonstrate the impact visually on an owned Mac.
 The `main` branch already contains the ad-hoc-signed arm64 Mach-O library,
@@ -12,11 +12,18 @@ The victim flow is only:
 1. Clone the private repository to a fresh path on an Apple-silicon Mac.
 2. Open that folder normally in VS Code.
 3. If prompted, trust the workspace and ensure the Go extension is enabled.
+4. Click `demo.go` in the Explorer.
 
-During workspace initialization, gopls requests compiled package metadata.
-Apple Clang reads the repository target config, loads the included dylib, and
-the dylib opens Calculator. The victim does not run a setup script, build,
-test, or Go program.
+VS Code lazily activates the Go extension when the Go file is opened. During
+the resulting gopls workspace initialization, gopls requests compiled package
+metadata. Apple Clang reads the repository target config, loads the included
+dylib, and the dylib opens Calculator. The victim does not run a setup script,
+build, test, or Go program.
+
+The direct LSP reproduction still shows that, once gopls is running, execution
+occurs during initialization before a `textDocument/didOpen` notification is
+needed. The additional click is the measured VS Code extension-activation
+boundary, not a compiler or gopls requirement.
 
 Use `gh repo clone` rather than a browser ZIP for the recording so macOS does
 not add browser-download quarantine metadata to the dylib. The included binary
