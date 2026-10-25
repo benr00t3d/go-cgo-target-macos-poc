@@ -71,6 +71,9 @@ if command -v codesign >/dev/null 2>&1; then
 else
     CODESIGN_STATUS=127
 fi
+if command -v codesign >/dev/null 2>&1; then
+    codesign -dvvv "$DYLIB" >"$TMP/codesign-detail.txt" 2>&1 || true
+fi
 file "$DYLIB" >"$TMP/dylib.file"
 rm -f "$MARKER"
 
@@ -101,6 +104,8 @@ COMMON_ENV=(
     "GOMODCACHE=$TMP/modcache"
     "GO_CGO_MACOS_POC_MARKER=$MARKER"
 )
+env "${COMMON_ENV[@]}" "$GO_BIN" env GOOS GOARCH CGO_ENABLED CC \
+    >"$TMP/go-env.txt" 2>"$TMP/go-env.stderr"
 
 run_go_case() {
     CASE=$1
@@ -167,6 +172,9 @@ fi
     printf 'machine=%s\ngoarch=%s\n' "$MACHINE" "$GOARCH"
     printf 'go=%s\n' "$($GO_BIN version 2>&1)"
     printf 'clang=%s\n' "$($CLANG_BIN --version 2>&1 | head -n 1)"
+    printf 'xcode=%s\n' "$(xcodebuild -version 2>/dev/null | tr '\n' ';' || true)"
+    printf 'sdk=%s\n' "$(xcrun --show-sdk-path 2>/dev/null || true)"
+    printf 'go_env=%s\n' "$(tr '\n' ',' <"$TMP/go-env.txt")"
     printf 'target=%s\nconfig=%s\n' "$TARGET" "$CONFIG_REL"
     printf 'dylib=%s\n' "$(cat "$TMP/dylib.file")"
     printf 'codesign_status=%s\n' "$CODESIGN_STATUS"

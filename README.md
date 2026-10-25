@@ -63,9 +63,9 @@ machine-specific absolute path.
 
 ## Proof gates
 
-A macOS receipt should retain `summary.txt`, all three stderr/stdout pairs,
-`direct-clang.stderr`, the marker, `file` output for the dylib, and hashes of
-this directory. It must show:
+A macOS receipt should retain `summary.txt`, `go-env.txt`, all three
+stderr/stdout pairs, `direct-clang.stderr`, the marker, `file` and code-signing
+output for the dylib, and hashes of this directory. It must show:
 
 1. the library is Mach-O for the running architecture;
 2. direct Apple Clang invocation loads it through the derived target config;
