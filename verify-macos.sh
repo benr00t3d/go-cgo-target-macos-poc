@@ -21,6 +21,11 @@ fail() {
 [ "$(uname -s)" = Darwin ] || fail "this candidate must run on macOS"
 [ -n "$GO_BIN" ] || fail "go was not found"
 [ -n "$CLANG_BIN" ] || fail "Apple Clang was not found"
+if [ -z "${SDKROOT:-}" ] && command -v xcrun >/dev/null 2>&1; then
+    SDKROOT=$(xcrun --sdk macosx --show-sdk-path 2>/dev/null || true)
+fi
+[ -n "${SDKROOT:-}" ] && [ -d "$SDKROOT" ] || fail "the macOS SDK was not found"
+export SDKROOT
 
 MACHINE=$(uname -m)
 case "$MACHINE" in
@@ -58,7 +63,8 @@ mkdir -p "$TMP/positive/$(dirname "$CONFIG_REL")" \
 
 DYLIB="$TMP/positive/$(dirname "$CONFIG_REL")/marker_plugin.dylib"
 MARKER="$TMP/marker.txt"
-"$CLANG_BIN" -dynamiclib -fPIC -arch "$MACHINE" "$ROOT/plugin/marker.c" -o "$DYLIB" \
+"$CLANG_BIN" -isysroot "$SDKROOT" -dynamiclib -fPIC -arch "$MACHINE" \
+    "$ROOT/plugin/marker.c" -o "$DYLIB" \
     >"$TMP/dylib-build.stdout" 2>"$TMP/dylib-build.stderr" \
     || fail "failed to build the benign Mach-O library"
 
@@ -83,7 +89,8 @@ set +e
 (
     cd "$TMP/positive"
     env GO_CGO_MACOS_POC_MARKER="$MARKER" \
-        "$CLANG_BIN" -target "$TARGET" -c "$ROOT/probe.c" -o "$TMP/probe.o" \
+        "$CLANG_BIN" -isysroot "$SDKROOT" -target "$TARGET" \
+        -c "$ROOT/probe.c" -o "$TMP/probe.o" \
         >"$TMP/direct-clang.stdout" 2>"$TMP/direct-clang.stderr"
 )
 DIRECT_STATUS=$?
@@ -102,6 +109,7 @@ COMMON_ENV=(
     "CC=$CLANG_BIN"
     "CXX=$CLANG_BIN"
     "GOMODCACHE=$TMP/modcache"
+    "SDKROOT=$SDKROOT"
     "GO_CGO_MACOS_POC_MARKER=$MARKER"
 )
 env "${COMMON_ENV[@]}" "$GO_BIN" env GOOS GOARCH CGO_ENABLED CC \
@@ -174,6 +182,7 @@ fi
     printf 'clang=%s\n' "$($CLANG_BIN --version 2>&1 | head -n 1)"
     printf 'xcode=%s\n' "$(xcodebuild -version 2>/dev/null | tr '\n' ';' || true)"
     printf 'sdk=%s\n' "$(xcrun --show-sdk-path 2>/dev/null || true)"
+    printf 'sdkroot=%s\n' "$SDKROOT"
     printf 'go_env=%s\n' "$(tr '\n' ',' <"$TMP/go-env.txt")"
     printf 'target=%s\nconfig=%s\n' "$TARGET" "$CONFIG_REL"
     printf 'dylib=%s\n' "$(cat "$TMP/dylib.file")"

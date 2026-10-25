@@ -26,6 +26,11 @@ chmod +x verify-macos.sh
 `GO_BIN` and `CC_BIN` can select exact binaries. `KEEP_TMP=1` retains the
 temporary directory and logs.
 
+The verifier resolves the active macOS SDK with `xcrun` and exports
+`SDKROOT` explicitly. This is needed on Command Line Tools installations where
+invoking the resolved Clang binary directly does not otherwise find SDK
+headers.
+
 The script prints Apple Clang, macOS, Go, architecture, code-signing, direct
 driver, and three Go decisions. The decisive vulnerable result is:
 
