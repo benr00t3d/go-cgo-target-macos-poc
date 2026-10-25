@@ -1,0 +1,57 @@
+name: Package arm64 Calculator demo library
+
+on:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  package:
+    runs-on: macos-15
+    steps:
+      - uses: actions/checkout@v4
+      - name: Build, sign, and concurrency-test visual demo library
+        shell: bash
+        run: |
+          set -euo pipefail
+          SDKROOT="$(xcrun --sdk macosx --show-sdk-path)"
+          CLANG="$(xcrun --find clang)"
+          mkdir -p packaged smoke/state smoke/copy
+          "$CLANG" -isysroot "$SDKROOT" -dynamiclib -fPIC -arch arm64 \
+            plugin/calculator_demo.c -o packaged/calculator_plugin.dylib
+          codesign --force --sign - packaged/calculator_plugin.dylib
+          file packaged/calculator_plugin.dylib
+          codesign --verify --verbose=2 packaged/calculator_plugin.dylib
+          shasum -a 256 packaged/calculator_plugin.dylib
+          cat > smoke/host.c <<'EOF'
+          #include <dlfcn.h>
+          int main(int argc, char **argv) {
+              if (argc != 2) return 2;
+              return dlopen(argv[1], RTLD_NOW) == 0 ? 1 : 0;
+          }
+          EOF
+          "$CLANG" -isysroot "$SDKROOT" -arch arm64 smoke/host.c -o smoke/host
+          export GO_CGO_MACOS_CALC_LOCK_DIR="$PWD/smoke/state"
+          export GO_CGO_MACOS_CALC_RECEIPT="$PWD/smoke/launch.log"
+          export GO_CGO_MACOS_CALC_MARKER="$PWD/smoke/load.log"
+          for attempt in 1 2 3 4; do
+            ./smoke/host "$PWD/packaged/calculator_plugin.dylib" &
+          done
+          wait
+          cp packaged/calculator_plugin.dylib smoke/copy/calculator_plugin.dylib
+          ./smoke/host "$PWD/smoke/copy/calculator_plugin.dylib"
+          test "$(grep -c 'event=launch-success' smoke/launch.log)" -eq 5
+          test "$(grep -c 'calculator-plugin-loaded' smoke/load.log)" -eq 5
+          test "$(sed -n 's/.* id=\([^ ]*\).*/\1/p' smoke/launch.log | sort -u | wc -l | tr -d ' ')" -eq 2
+          test "$(find smoke/state -name '*.lock' | wc -l | tr -d ' ')" -eq 2
+          grep 'lock_rc=0 attr_rc=0 spawn_rc=0' smoke/launch.log
+          grep 'wait_rc=0 exit=0 signal=-1' smoke/launch.log
+      - uses: actions/upload-artifact@v4
+        with:
+          name: calculator-plugin-arm64-every-load
+          path: |
+            packaged/calculator_plugin.dylib
+            smoke/launch.log
+            smoke/load.log
+          if-no-files-found: error
