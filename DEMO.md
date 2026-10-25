@@ -39,17 +39,22 @@ the repository-selected `README.go`; no manual Go-file click is needed.
 Use `gh repo clone` rather than a browser ZIP for the recording so macOS does
 not add browser-download quarantine metadata to the dylib. The included binary
 is arm64 and was built and ad-hoc signed on GitHub's macOS runner. SHA-256:
-`aed1baa4af2967cff96ca1160762c650e0d2e038da60e95135c7acb21c08c4f1`.
+`167649f7bd790c00deab6ef829b82f2908663129c724ee809cde0c9ba66dfea4`.
 
 For another recording take, use a new clone path and remove the one-shot file
-`/tmp/go-cgo-vscode-readme-startup-20261025.once` before reopening VS Code.
+`/tmp/go-cgo-vscode-readme-startup-v2-20261025.once` before reopening VS Code.
 This reset is only for the researcher making repeated recordings; it is not
 part of the victim flow.
 
 The visual plugin launches Calculator by its Apple bundle identifier through
-`/usr/bin/open` directly with
-`posix_spawn`; it does not invoke a shell or access the network. The marker-only
-vendor verifier remains available under tag `vendor-marker-only-20261025`.
+`/usr/bin/open` directly with `posix_spawn`; it does not invoke a shell or
+access the network. The helper runs in its own session with an empty signal
+mask and closed inherited descriptors, and the plugin waits for its exit
+status before recording success. Launch diagnostics are
+appended to `/tmp/go-cgo-vscode-readme-launch-v2-20261025.log`. A failed helper
+does not create the success sentinel, so a later compiler load may retry. The
+marker-only vendor verifier remains available under tag
+`vendor-marker-only-20261025`.
 
 ## Marker-only verifier
 
