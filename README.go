@@ -5,4 +5,3 @@ package calculator_demo
 #cgo darwin,amd64 CFLAGS: -target x86_64-cfg/poc-darwin
 */
 import "C"
-

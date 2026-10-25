@@ -2,6 +2,5 @@
 .calculator-demo.once
 .calculator-loaded
 .video-gocache/
-.vscode/settings.json
 x86_64-cfg/calculator_plugin.dylib
 

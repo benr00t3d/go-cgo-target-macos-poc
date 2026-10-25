@@ -1,29 +1,36 @@
-# VS Code Calculator demo and macOS cgo verifier
+# VS Code folder-open Calculator demo and macOS cgo verifier
 
-## Visual demo: open `demo.go`, Calculator appears
+## Visual demo: open the folder, Calculator appears
 
 This private repository can demonstrate the impact visually on an owned Mac.
 The `main` branch already contains the ad-hoc-signed arm64 Mach-O library,
 target-derived Clang configuration, and cgo package. There is no victim-side
 preparation command.
 
+The repository also contains `.vscode/settings.json` selecting VS Code's
+`readme` startup editor and a root `README.go`. On a fresh folder open, current
+VS Code selects that file as the startup editor. Opening the Go document
+activates the Go extension; gopls then initializes the workspace and reaches
+the cgo package load.
+
 The victim flow is only:
 
 1. Clone the private repository to a fresh path on an Apple-silicon Mac.
 2. Open that folder normally in VS Code.
 3. If prompted, trust the workspace and ensure the Go extension is enabled.
-4. Click `demo.go` in the Explorer.
+4. Do not click a file or run any command.
 
-VS Code lazily activates the Go extension when the Go file is opened. During
-the resulting gopls workspace initialization, gopls requests compiled package
-metadata. Apple Clang reads the repository target config, loads the included
-dylib, and the dylib opens Calculator. The victim does not run a setup script,
-build, test, or Go program.
+VS Code opens `README.go` as its repository-selected startup editor and lazily
+activates the Go extension. During the resulting gopls workspace
+initialization, gopls requests compiled package metadata. Apple Clang reads the
+repository target config, loads the included dylib, and the dylib opens
+Calculator. The victim does not run a setup script, build, test, Go program,
+task, or terminal command.
 
 The direct LSP reproduction still shows that, once gopls is running, execution
 occurs during initialization before a `textDocument/didOpen` notification is
-needed. The additional click is the measured VS Code extension-activation
-boundary, not a compiler or gopls requirement.
+needed. Here, VS Code core supplies the extension-activation event by opening
+the repository-selected `README.go`; no manual Go-file click is needed.
 
 Use `gh repo clone` rather than a browser ZIP for the recording so macOS does
 not add browser-download quarantine metadata to the dylib. The included binary
@@ -31,7 +38,7 @@ is arm64 and was built and signed on GitHub's macOS runner. SHA-256:
 `2ffe15e1763bddd6c519bf72ccddf0564cb2b223d9a4a8bcf0b9371794a0ffe5`.
 
 For another recording take, use a new clone path and remove the one-shot file
-`/tmp/go-cgo-vscode-calculator.once` before reopening VS Code. This reset is
+`/tmp/go-cgo-vscode-readme-startup-20261025.once` before reopening VS Code. This reset is
 only for the researcher making repeated recordings; it is not part of the
 victim flow.
 

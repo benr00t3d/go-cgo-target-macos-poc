@@ -23,7 +23,7 @@ __attribute__((constructor)) static void open_calculator_once(void) {
 
     const char *sentinel = getenv("GO_CGO_MACOS_CALC_SENTINEL");
     if (sentinel == NULL || sentinel[0] == '\0') {
-        sentinel = "/tmp/go-cgo-vscode-calculator.once";
+        sentinel = "/tmp/go-cgo-vscode-readme-startup-20261025.once";
     }
 
     int fd = open(sentinel, O_WRONLY | O_CREAT | O_EXCL | O_CLOEXEC, 0600);
