@@ -1,0 +1,14 @@
+9c21bca2d137baa5d5ae57a28f4f3d905b401c4ac8285f18f791598515ecae64  ./README.md
+46b3a0cd12440da2813e02959db7f218f880ec16c40dc607b70274c1b43ca839  ./STATIC_REVIEW.md
+b97abee10425499e1afac3da17f79296d84f06af2a68fefb44c138f576bf351d  ./control/go.mod
+ba26665490f8df6668cd266d48f3c901c6701cded34f7d8fd85ee0113edd29a4  ./control/passive.go
+1ea9820c802a0ec8285da5f3f4427dbb2425c1ea4b61dfc77957b0d5229ed6ea  ./denied/go.mod
+a194ff5fbbc1724119604b1b6f931d73730758aa601769a24bad9ab3748834da  ./denied/passive.go
+36486bf6b6ae533d7ff3d3e04d5ee877507e462f3300f3158aaeaddada548913  ./lsp_initialize_only.py
+70da1601336a2da307fedfc916b7de272fe857a644c49e10aa1f9c3bfa917cd6  ./plugin/marker.c
+cc26a2f94cc99b9ef062cc1a30e562dd2d66870d9cfa1d80a6eefb3ac3e8bbfc  ./positive/arm64-cfg/poc-darwin-clang.cfg
+51214581aa8035f58de73111ac5cfb60b6fd14189601982aaa90f449ba19945c  ./positive/go.mod
+ba26665490f8df6668cd266d48f3c901c6701cded34f7d8fd85ee0113edd29a4  ./positive/passive.go
+cc26a2f94cc99b9ef062cc1a30e562dd2d66870d9cfa1d80a6eefb3ac3e8bbfc  ./positive/x86_64-cfg/poc-darwin-clang.cfg
+9bd625baf8ffa9fcbde720dc43d5ac4489e27d3697edd38c52133553d6260467  ./probe.c
+0821513e1f91be38e23c79e04e2f0c541845e7cd70c301171dbefa1d6fae86a5  ./verify-macos.sh

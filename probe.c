@@ -1,0 +1,2 @@
+int harmless_probe;
+
