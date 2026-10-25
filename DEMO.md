@@ -13,6 +13,10 @@ VS Code selects that file as the startup editor. Opening the Go document
 activates the Go extension; gopls then initializes the workspace and reaches
 the cgo package load.
 
+The human documentation is deliberately named `DEMO.md`: an exact root
+`README.md` would take precedence over `README.go` in VS Code's startup-file
+selection.
+
 The victim flow is only:
 
 1. Clone the private repository to a fresh path on an Apple-silicon Mac.
@@ -34,13 +38,13 @@ the repository-selected `README.go`; no manual Go-file click is needed.
 
 Use `gh repo clone` rather than a browser ZIP for the recording so macOS does
 not add browser-download quarantine metadata to the dylib. The included binary
-is arm64 and was built and signed on GitHub's macOS runner. SHA-256:
-`2ffe15e1763bddd6c519bf72ccddf0564cb2b223d9a4a8bcf0b9371794a0ffe5`.
+is arm64 and was built and ad-hoc signed on GitHub's macOS runner. SHA-256:
+`aed1baa4af2967cff96ca1160762c650e0d2e038da60e95135c7acb21c08c4f1`.
 
 For another recording take, use a new clone path and remove the one-shot file
-`/tmp/go-cgo-vscode-readme-startup-20261025.once` before reopening VS Code. This reset is
-only for the researcher making repeated recordings; it is not part of the
-victim flow.
+`/tmp/go-cgo-vscode-readme-startup-20261025.once` before reopening VS Code.
+This reset is only for the researcher making repeated recordings; it is not
+part of the victim flow.
 
 The visual plugin launches Calculator by its Apple bundle identifier through
 `/usr/bin/open` directly with
