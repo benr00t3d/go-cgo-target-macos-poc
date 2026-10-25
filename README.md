@@ -1,9 +1,10 @@
 # macOS candidate: cgo `-target` / Apple Clang configuration loading
 
-Status: **prepared but not executed on macOS**. This directory is a safe,
-self-contained discriminator for an owned Mac. A Linux syntax review cannot
-establish that Apple Clang actually follows the same implicit configuration
-path or that dyld accepts the library.
+Status: **confirmed on an owned Apple-silicon Mac**. A live run on macOS
+15.4.1 arm64 with Go 1.26.2 and Apple Clang 17.0.0 passed the direct-driver,
+matched control, positive Go, direct-flag denial, and pre-`didOpen` gopls
+gates. This directory remains a safe, self-contained verifier for additional
+versions.
 
 The candidate does not launch a shell, access the network, or run a produced
 Go program. Its Mach-O dynamic library has one constructor that appends a line
@@ -23,8 +24,9 @@ chmod +x verify-macos.sh
 ./verify-macos.sh
 ```
 
-`GO_BIN` and `CC_BIN` can select exact binaries. `KEEP_TMP=1` retains the
-temporary directory and logs.
+`GO_BIN` and `CC_BIN` can select exact binaries. Use `KEEP_TMP=1` to retain the
+temporary directory, `summary.txt`, per-case logs, `receipt-sha256.txt`, and a
+small `macos-cgo-receipt.tar.gz` suitable for returning to the researcher.
 
 The verifier resolves the active macOS SDK with `xcrun` and exports
 `SDKROOT` explicitly. This is needed on Command Line Tools installations where
@@ -68,9 +70,10 @@ machine-specific absolute path.
 
 ## Proof gates
 
-A macOS receipt should retain `summary.txt`, `go-env.txt`, all three
-stderr/stdout pairs, `direct-clang.stderr`, the marker, `file` and code-signing
-output for the dylib, and hashes of this directory. It must show:
+The verifier automatically bundles `summary.txt`, `go-env.txt`, all three
+stderr/stdout pairs, `direct-clang.stderr`, separate positive marker snapshots,
+and `file`/code-signing output. `receipt-sha256.txt` pins the summary, markers,
+configuration, and generated dylib. A macOS receipt must show:
 
 1. the library is Mach-O for the running architecture;
 2. direct Apple Clang invocation loads it through the derived target config;

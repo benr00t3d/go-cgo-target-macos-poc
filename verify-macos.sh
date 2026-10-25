@@ -96,6 +96,9 @@ set +e
 DIRECT_STATUS=$?
 set -e
 if [ -s "$MARKER" ]; then DIRECT_MARKER=yes; else DIRECT_MARKER=no; fi
+if [ "$DIRECT_MARKER" = yes ]; then
+    cp "$MARKER" "$TMP/direct.marker"
+fi
 
 COMMON_ENV=(
     "GOENV=off"
@@ -143,6 +146,9 @@ cp -R "$TMP/cache-control/." "$TMP/cache-denied/" 2>/dev/null || true
 run_go_case positive "$TMP/cache-positive" "$TMP/tmp-positive"
 POSITIVE_STATUS=$CASE_STATUS
 POSITIVE_MARKER=$CASE_MARKER
+if [ "$POSITIVE_MARKER" = yes ]; then
+    cp "$MARKER" "$TMP/positive.marker"
+fi
 
 run_go_case denied "$TMP/cache-denied" "$TMP/tmp-denied"
 DENIED_STATUS=$CASE_STATUS
@@ -163,6 +169,9 @@ if [ -n "$GOPLS_BIN" ] && [ -n "$PYTHON_BIN" ]; then
     GOPLS_STATUS=$?
     set -e
     if [ -s "$MARKER" ]; then GOPLS_MARKER=yes; else GOPLS_MARKER=no; fi
+    if [ "$GOPLS_MARKER" = yes ]; then
+        cp "$MARKER" "$TMP/gopls.marker"
+    fi
 else
     GOPLS_STATUS=skip
     GOPLS_MARKER=not_run
@@ -175,11 +184,27 @@ else
     VERDICT=NOT_PROVEN
 fi
 
+if [ -n "$GOPLS_BIN" ]; then
+    GOPLS_VERSION=$("$GOPLS_BIN" version 2>&1 | tr '\n' ';')
+else
+    GOPLS_VERSION=not_available
+fi
+if command -v git >/dev/null 2>&1 && git -C "$ROOT" rev-parse --is-inside-work-tree >/dev/null 2>&1; then
+    VERIFIER_COMMIT=$(git -C "$ROOT" rev-parse HEAD 2>/dev/null || true)
+else
+    VERIFIER_COMMIT=archive_or_untracked
+fi
+
+RECEIPT_HASHES="$TMP/receipt-sha256.txt"
+RECEIPT_BUNDLE="$TMP/macos-cgo-receipt.tar.gz"
+
 {
     printf 'macos=%s\n' "$(sw_vers -productVersion 2>/dev/null || true)"
     printf 'machine=%s\ngoarch=%s\n' "$MACHINE" "$GOARCH"
     printf 'go=%s\n' "$($GO_BIN version 2>&1)"
+    printf 'gopls=%s\n' "$GOPLS_VERSION"
     printf 'clang=%s\n' "$($CLANG_BIN --version 2>&1 | head -n 1)"
+    printf 'verifier_commit=%s\n' "$VERIFIER_COMMIT"
     printf 'xcode=%s\n' "$(xcodebuild -version 2>/dev/null | tr '\n' ';' || true)"
     printf 'sdk=%s\n' "$(xcrun --show-sdk-path 2>/dev/null || true)"
     printf 'sdkroot=%s\n' "$SDKROOT"
@@ -194,7 +219,39 @@ fi
     printf 'gopls_status=%s\ngopls_marker_before_didopen=%s\n' "$GOPLS_STATUS" "$GOPLS_MARKER"
     printf 'verdict=%s\n' "$VERDICT"
     printf 'run=%s\n' "$TMP"
+    printf 'receipt_hashes=%s\nreceipt_bundle=%s\n' "$RECEIPT_HASHES" "$RECEIPT_BUNDLE"
 } | tee "$TMP/summary.txt"
+
+# Hash the final decision receipt and the exact code-loading inputs. Preserve
+# separate marker snapshots so the later negative control cannot erase proof
+# from an earlier positive row.
+(
+    cd "$TMP" || exit 1
+    for RECEIPT_FILE in \
+        summary.txt direct.marker positive.marker gopls.marker \
+        "positive/$CONFIG_REL" \
+        "positive/$(dirname "$CONFIG_REL")/marker_plugin.dylib"
+    do
+        [ -f "$RECEIPT_FILE" ] || continue
+        shasum -a 256 "$RECEIPT_FILE"
+    done
+) >"$RECEIPT_HASHES"
+
+RECEIPT_FILES=(
+    summary.txt receipt-sha256.txt go-env.txt go-env.stderr dylib.file
+    dylib-build.stdout dylib-build.stderr direct-clang.stdout direct-clang.stderr
+    control.stdout control.stderr positive.stdout positive.stderr
+    denied.stdout denied.stderr
+)
+for OPTIONAL_RECEIPT in \
+    direct.marker positive.marker gopls.marker \
+    codesign.stdout codesign.stderr codesign-detail.txt \
+    gopls.stdout gopls.stderr
+do
+    [ -f "$TMP/$OPTIONAL_RECEIPT" ] && RECEIPT_FILES+=("$OPTIONAL_RECEIPT")
+done
+tar -czf "$RECEIPT_BUNDLE" -C "$TMP" "${RECEIPT_FILES[@]}"
+printf 'receipt ready: %s\n' "$RECEIPT_BUNDLE"
 
 [ "$VERDICT" = APPLE_CLANG_AND_GO_PATH_POSITIVE ] || exit 1
 [ "$DENIED_STATUS" -ne 0 ] || exit 1

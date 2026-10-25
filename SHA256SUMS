@@ -1,4 +1,4 @@
-46dc8aac4c741050e98cdd34b0b31e1eadbcd74b710c13c50aeaf201949a8e0b  ./README.md
+1d8abca8b9c39fb0bac21aadc04f538f024927b3c11e1aa75a2aa6c17ee28cea  ./README.md
 46b3a0cd12440da2813e02959db7f218f880ec16c40dc607b70274c1b43ca839  ./STATIC_REVIEW.md
 b97abee10425499e1afac3da17f79296d84f06af2a68fefb44c138f576bf351d  ./control/go.mod
 ba26665490f8df6668cd266d48f3c901c6701cded34f7d8fd85ee0113edd29a4  ./control/passive.go
@@ -11,4 +11,4 @@ cc26a2f94cc99b9ef062cc1a30e562dd2d66870d9cfa1d80a6eefb3ac3e8bbfc  ./positive/arm
 ba26665490f8df6668cd266d48f3c901c6701cded34f7d8fd85ee0113edd29a4  ./positive/passive.go
 cc26a2f94cc99b9ef062cc1a30e562dd2d66870d9cfa1d80a6eefb3ac3e8bbfc  ./positive/x86_64-cfg/poc-darwin-clang.cfg
 9bd625baf8ffa9fcbde720dc43d5ac4489e27d3697edd38c52133553d6260467  ./probe.c
-680483a4413a25ad00fee5429693ec343620f7653cb6eadf3e3fbd2f5c469c4a  ./verify-macos.sh
+b9cec408fe8fe68c3f88b9a0ebc9f3b637ee0cd0570eebc142198f85c0d8bb8f  ./verify-macos.sh
