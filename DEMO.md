@@ -39,22 +39,33 @@ the repository-selected `README.go`; no manual Go-file click is needed.
 Use `gh repo clone` rather than a browser ZIP for the recording so macOS does
 not add browser-download quarantine metadata to the dylib. The included binary
 is arm64 and was built and ad-hoc signed on GitHub's macOS runner. SHA-256:
-`167649f7bd790c00deab6ef829b82f2908663129c724ee809cde0c9ba66dfea4`.
+`9e3c886aec3e2848a30d670b9793531b1866fe5c902b838111dc3788f063ca26`.
 
-For another recording take, use a new clone path and remove the one-shot file
-`/tmp/go-cgo-vscode-readme-startup-v2-20261025.once` before reopening VS Code.
-This reset is only for the researcher making repeated recordings; it is not
-part of the victim flow.
+There is no success sentinel or persistent suppression state. Each actual
+dylib constructor load asks LaunchServices to open Calculator and records the
+result. For a clean recording take, use a fresh clone path so VS Code and Go do
+not reuse prior workspace or compiler-cache state; there is no payload cleanup
+or preparation command.
 
 The visual plugin launches Calculator by its Apple bundle identifier through
 `/usr/bin/open` directly with `posix_spawn`; it does not invoke a shell or
 access the network. The helper runs in its own session with an empty signal
 mask and closed inherited descriptors, and the plugin waits for its exit
-status before recording success. Launch diagnostics are
-appended to `/tmp/go-cgo-vscode-readme-launch-v2-20261025.log`. A failed helper
-does not create the success sentinel, so a later compiler load may retry. The
-marker-only vendor verifier remains available under tag
+status. Concurrent compiler processes serialize only the short launch step
+through a per-dylib-path advisory lock; the lock never suppresses a later load
+and is automatically released if a process exits. macOS reuses the same
+Calculator application for repeated open requests.
+
+Launch diagnostics append to
+`/tmp/go-cgo-vscode-readme-launch-<uid>.log`. Every line includes the loaded
+dylib's canonical-path identity and the spawn, wait, exit, and signal results.
+The marker-only vendor verifier remains available under tag
 `vendor-marker-only-20261025`.
+
+Opening the same workspace later only re-triggers the visual path if Go/gopls
+actually invokes Clang again; IDE and Go caches may avoid that work. A fresh
+clone path is the reproducible folder-open test because it supplies new
+workspace and build-cache inputs.
 
 ## Marker-only verifier
 
