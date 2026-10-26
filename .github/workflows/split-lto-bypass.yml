@@ -31,6 +31,25 @@ jobs:
             -o split-lto/candidate.dylib \
             split-lto/plugin/marker.c
 
+          xcrun clang -flto -c split-lto/plugin/direct.c \
+            -o "$RUNNER_TEMP/direct.o"
+
+          set +e
+          xcrun clang "$RUNNER_TEMP/direct.o" \
+            -l to_library split-lto/candidate.dylib \
+            -o "$RUNNER_TEMP/direct-bin" \
+            >"$RUNNER_TEMP/direct.stdout" \
+            2>"$RUNNER_TEMP/direct.stderr"
+          direct_status=$?
+          set -e
+
+          if [[ -f "$marker" ]]; then
+            direct_marker=present
+          else
+            direct_marker=absent
+          fi
+          rm -f "$marker"
+
           set +e
           go build -buildvcs=false -x ./split-lto \
             >"$RUNNER_TEMP/go-build.stdout" \
@@ -41,6 +60,12 @@ jobs:
           printf 'go=%s\n' "$(go version)"
           printf 'macos=%s\n' "$(sw_vers -productVersion)"
           printf 'machine=%s\n' "$(uname -m)"
+          printf 'clang=%s\n' "$(xcrun clang --version | head -1)"
+          printf 'direct_status=%s\n' "$direct_status"
+          printf 'direct_marker=%s\n' "$direct_marker"
+          if [[ -s "$RUNNER_TEMP/direct.stderr" ]]; then
+            tail -40 "$RUNNER_TEMP/direct.stderr"
+          fi
           printf 'build_status=%s\n' "$build_status"
 
           if [[ -f "$marker" ]]; then
