@@ -1,0 +1,55 @@
+name: split-lto-bypass
+
+on:
+  push:
+    branches:
+      - research/split-lto-bypass
+
+permissions:
+  contents: read
+
+jobs:
+  validate:
+    runs-on: macos-14
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-go@v6
+        with:
+          go-version: 1.26.2
+          cache: false
+      - name: Run bounded linker-load discriminator
+        shell: bash
+        run: |
+          set -u -o pipefail
+
+          marker="$RUNNER_TEMP/go-split-lto-marker.txt"
+          export GO_SPLIT_LTO_MARKER="$marker"
+          rm -f "$marker"
+
+          xcrun clang -dynamiclib \
+            -o split-lto/candidate.dylib \
+            split-lto/plugin/marker.c
+
+          set +e
+          go build -buildvcs=false -x ./split-lto \
+            >"$RUNNER_TEMP/go-build.stdout" \
+            2>"$RUNNER_TEMP/go-build.stderr"
+          build_status=$?
+          set -e
+
+          printf 'go=%s\n' "$(go version)"
+          printf 'macos=%s\n' "$(sw_vers -productVersion)"
+          printf 'machine=%s\n' "$(uname -m)"
+          printf 'build_status=%s\n' "$build_status"
+
+          if [[ -f "$marker" ]]; then
+            printf 'marker=present\n'
+            cat "$marker"
+            printf 'verdict=SPLIT_LTO_LIBRARY_LOADED\n'
+          else
+            printf 'marker=absent\n'
+            printf 'verdict=NOT_REPRODUCED\n'
+            tail -100 "$RUNNER_TEMP/go-build.stderr"
+            exit 1
+          fi
