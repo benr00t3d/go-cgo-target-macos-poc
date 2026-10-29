@@ -37,7 +37,8 @@ Materials:
 
 - Repository: https://github.com/benr00t3d/go-cgo-target-macos-poc
 - Full report: https://github.com/benr00t3d/go-cgo-target-macos-poc/blob/main/disclosure/REPORT.md
-- Video-tested revision: `38ce6f0cbbd86bb9e33269215f78122c11036d86`
+- Clean reproduction revision: `0fd006c5f8af1268a2665bd0c51c0da64186643b`
+- Earlier video-tested revision: `38ce6f0cbbd86bb9e33269215f78122c11036d86`
 - Marker-only control tag: `macos-live-positive-20261025`
 - Video: [private video URL]
 
