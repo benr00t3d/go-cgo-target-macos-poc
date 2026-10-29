@@ -4,7 +4,9 @@ Date: 2026-10-25
 
 Component: `cmd/go` cgo flag validation
 
-Reporter: [preferred name or handle]
+Reporter: Robert Prast
+
+Repository: https://github.com/benr00t3d/go-cgo-target-macos-poc
 
 ## Summary
 
