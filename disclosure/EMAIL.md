@@ -33,6 +33,18 @@ The trigger is the compiler invocation during background analysis, not the
 window-open event itself. A later reopen can reuse gopls state or Go's build
 cache and may not invoke Clang or reload the library.
 
+For repeated local demonstrations, close the VS Code window and reset the
+visible application, language server, and Go build cache before reopening it:
+
+```sh
+/usr/bin/killall Calculator 2>/dev/null || true
+pkill -x gopls 2>/dev/null || true
+go clean -cache
+```
+
+This reset is only for repeating the visual demonstration. It is not required
+for the first analysis of a fresh clone.
+
 I reproduced the visual path on an M1 MacBook Air with macOS 15.4.1, Go 1.26.2,
 Apple Clang 17.0.0, gopls v0.21.1, VS Code 1.143.1, and the Go extension v0.58.0.
 I also reproduced the underlying `cmd/go` path on Linux with Go 1.26.10, Go
