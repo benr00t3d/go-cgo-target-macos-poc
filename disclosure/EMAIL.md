@@ -23,10 +23,15 @@ gh repo clone benr00t3d/go-cgo-target-macos-poc "$DEMO_ROOT/repo"
 code --new-window "$DEMO_ROOT/repo"
 ```
 
-If the location is already trusted, Calculator opens when the folder opens. In
-a new location, it opens immediately after Workspace Trust is granted. I did
-not run a build, test, task, or terminal command inside VS Code. The
-demonstration library only opens Calculator and writes a local receipt.
+On the first analysis of a fresh clone, Calculator opens while the Go extension
+indexes the workspace. This happens immediately in an already trusted location,
+or after Workspace Trust is granted in a new location. I did not run a build,
+test, task, or terminal command inside VS Code. The demonstration library only
+opens Calculator and writes a local receipt.
+
+The trigger is the compiler invocation during background analysis, not the
+window-open event itself. A later reopen can reuse gopls state or Go's build
+cache and may not invoke Clang or reload the library.
 
 I reproduced the visual path on an M1 MacBook Air with macOS 15.4.1, Go 1.26.2,
 Apple Clang 17.0.0, gopls v0.21.1, VS Code 1.143.1, and the Go extension v0.58.0.
