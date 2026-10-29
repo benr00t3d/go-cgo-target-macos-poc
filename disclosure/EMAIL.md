@@ -48,8 +48,8 @@ The trigger is the compiler invocation during background analysis, not the
 window-open event itself. A later reopen can reuse gopls state or Go's build
 cache and may not invoke Clang or reload the library.
 
-For repeated local demonstrations, close any VS Code window using the clone,
-then reset the visible application, language server, and Go build cache:
+For repeated local demonstrations, you can keep resetting the language server
+and Go build cache:
 
 ```sh
 /usr/bin/killall Calculator 2>/dev/null || true
