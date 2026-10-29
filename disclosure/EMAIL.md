@@ -29,12 +29,27 @@ or after Workspace Trust is granted in a new location. I did not run a build,
 test, task, or terminal command inside VS Code. The demonstration library only
 opens Calculator and writes a local receipt.
 
+VS Code is not required. The same path can be reproduced directly from a
+terminal with a fresh clone:
+
+```sh
+DEMO_ROOT="$(mktemp -d /tmp/go-cgo-terminal.XXXXXX)"
+gh repo clone benr00t3d/go-cgo-target-macos-poc "$DEMO_ROOT/repo"
+cd "$DEMO_ROOT/repo"
+CGO_ENABLED=1 go list -compiled .
+```
+
+Calculator opens while `go list` requests compiled package metadata. This does
+not produce or run a target executable. VS Code and gopls are a real-world
+background-analysis trigger for the same `cmd/go` path, not requirements for
+the vulnerability.
+
 The trigger is the compiler invocation during background analysis, not the
 window-open event itself. A later reopen can reuse gopls state or Go's build
 cache and may not invoke Clang or reload the library.
 
-For repeated local demonstrations, close the VS Code window and reset the
-visible application, language server, and Go build cache before reopening it:
+For repeated local demonstrations, close any VS Code window using the clone,
+then reset the visible application, language server, and Go build cache:
 
 ```sh
 /usr/bin/killall Calculator 2>/dev/null || true
